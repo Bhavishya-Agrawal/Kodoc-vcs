@@ -46,5 +46,5 @@ Kodoc is a web-based document editor that treats every save as a commit. Never l
 
 ## Roles
 - **Backend Lead and Team Leader** - Bhavishya Agrawal
-- **Frontend Developers** - Abhishek Singh and Abhay Pratap Singh
-- **Backend Developers** - Aman Pathak and Mishra Ram Pankaj
+- **Frontend Developers** - Abhishek Singh and Aman Pathak
+- **Backend Developers** - Abhay Pratap Singh and Mishra Ram Pankaj
