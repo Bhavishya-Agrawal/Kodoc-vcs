@@ -4,8 +4,6 @@ import Version from "../models/Version.js";
 import authMiddleware from "../middleware/auth.js";
 import {
   normalizeContent,
-  hashContent,
-  buildCommitId,
   buildDefaultCommitMessage,
 } from "../utils/versioning.js";
 
@@ -54,7 +52,6 @@ router.post("/:docId/versions", verifyDocumentOwnership, async (req, res) => {
     const { content = "", commitMessage } = req.body;
     const document = req.document;
     const normalizedContent = normalizeContent(content);
-    const newContentHash = hashContent(normalizedContent);
 
     let latestVersion = null;
     if (document.latestVersionId) {
@@ -67,11 +64,9 @@ router.post("/:docId/versions", verifyDocumentOwnership, async (req, res) => {
       });
     }
 
-    const latestHash = latestVersion
-      ? latestVersion.contentHash || hashContent(normalizeContent(latestVersion.content || ""))
-      : document.latestContentHash;
+    const latestContent = latestVersion ? normalizeContent(latestVersion.content || "") : "";
 
-    if (latestHash === newContentHash) {
+    if (latestContent === normalizedContent) {
       return res.status(200).json({
         saved: false,
         reason: "NO_CHANGES",
@@ -93,12 +88,6 @@ router.post("/:docId/versions", verifyDocumentOwnership, async (req, res) => {
       documentId: document._id,
       versionNumber: newVersionNumber,
       content: normalizedContent,
-      contentHash: newContentHash,
-      commitId: buildCommitId({
-        contentHash: newContentHash,
-        versionNumber: newVersionNumber,
-        createdAt,
-      }),
       commitMessage: resolvedCommitMessage,
       parentVersionId: latestVersion?._id || null,
       action: "save",
@@ -113,7 +102,6 @@ router.post("/:docId/versions", verifyDocumentOwnership, async (req, res) => {
     // Update the document's current version
     document.currentVersion = newVersionNumber;
     document.latestVersionId = newVersion._id;
-    document.latestContentHash = newContentHash;
     await document.save();
 
     res.json({ saved: true, version: newVersion });
@@ -167,13 +155,10 @@ router.post("/:docId/versions/:versionId/restore", verifyDocumentOwnership, asyn
       });
     }
 
-    const targetHash =
-      oldVersion.contentHash || hashContent(normalizeContent(oldVersion.content || ""));
-    const latestHash = latestVersion
-      ? latestVersion.contentHash || hashContent(normalizeContent(latestVersion.content || ""))
-      : document.latestContentHash;
+    const targetContent = normalizeContent(oldVersion.content || "");
+    const latestContent = latestVersion ? normalizeContent(latestVersion.content || "") : "";
 
-    if (latestHash === targetHash) {
+    if (latestContent === targetContent) {
       return res.status(200).json({
         saved: false,
         reason: "NO_CHANGES",
@@ -195,12 +180,6 @@ router.post("/:docId/versions/:versionId/restore", verifyDocumentOwnership, asyn
       documentId: document._id,
       versionNumber: newVersionNumber,
       content: oldVersion.content, // Copy old content
-      contentHash: targetHash,
-      commitId: buildCommitId({
-        contentHash: targetHash,
-        versionNumber: newVersionNumber,
-        createdAt,
-      }),
       commitMessage: resolvedCommitMessage,
       parentVersionId: latestVersion?._id || null,
       action: "restore",
@@ -217,7 +196,6 @@ router.post("/:docId/versions/:versionId/restore", verifyDocumentOwnership, asyn
     // Update document
     document.currentVersion = newVersionNumber;
     document.latestVersionId = restoredVersion._id;
-    document.latestContentHash = targetHash;
     await document.save();
 
     res.json({ saved: true, version: restoredVersion });

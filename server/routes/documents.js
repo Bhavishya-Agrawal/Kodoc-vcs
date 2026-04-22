@@ -3,8 +3,6 @@ import Document from "../models/Document.js";
 import Version from "../models/Version.js";
 import authMiddleware from "../middleware/auth.js";
 import {
-  hashContent,
-  buildCommitId,
   buildDefaultCommitMessage,
 } from "../utils/versioning.js";
 
@@ -61,7 +59,6 @@ router.post("/", async (req, res) => {
   try {
     const { title } = req.body;
     const initialContent = "<p></p>";
-    const initialHash = hashContent(initialContent);
     const uniqueTitle = await generateUniqueTitle(req.user.id, title || "Untitled Document");
 
     // Create the document
@@ -69,7 +66,6 @@ router.post("/", async (req, res) => {
       title: uniqueTitle,
       owner: req.user.id,
       currentVersion: 1,
-      latestContentHash: initialHash,
     });
     
     await document.save();
@@ -80,12 +76,6 @@ router.post("/", async (req, res) => {
       documentId: document._id,
       versionNumber: 1,
       content: initialContent, // Empty paragraph for tiptap
-      contentHash: initialHash,
-      commitId: buildCommitId({
-        contentHash: initialHash,
-        versionNumber: 1,
-        createdAt,
-      }),
       commitMessage: buildDefaultCommitMessage({ action: "initial", versionNumber: 1 }),
       action: "initial",
       contentSizeBytes: Buffer.byteLength(initialContent, "utf8"),

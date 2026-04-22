@@ -15,15 +15,7 @@ const versionSchema = new mongoose.Schema(
       type: String, // Tiptap HTML/JSON string
       default: "",
     },
-    contentHash: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    commitId: {
-      type: String,
-      required: true,
-    },
+
     commitMessage: {
       type: String,
       required: true,
@@ -64,7 +56,6 @@ const versionSchema = new mongoose.Schema(
 
 versionSchema.index({ documentId: 1, versionNumber: -1 }, { unique: true });
 versionSchema.index({ documentId: 1, createdAt: -1 });
-versionSchema.index({ documentId: 1, contentHash: 1 });
 
 const Version = mongoose.model("Version", versionSchema);
 export default Version;

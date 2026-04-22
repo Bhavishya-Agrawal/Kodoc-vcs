@@ -1,0 +1,7 @@
+{
+  "name": "kodoc-vcs-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "start cmd.exe /k \"cd server && npm run dev\" & start cmd.exe /k \"cd frontend && npm run dev\""
+  }
+}

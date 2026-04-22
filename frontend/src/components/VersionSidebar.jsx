@@ -95,7 +95,7 @@ const VersionSidebar = ({ documentId }) => {
                 {formatTimeAgo(version.createdAt)}
               </p>
               <p className="text-[11px] text-gray-500 mb-3">
-                {version.commitId ? `commit ${version.commitId}` : "legacy version"} · {formatAbsoluteTime(version.createdAt)}
+                {formatAbsoluteTime(version.createdAt)}
               </p>
               {version.action === "restore" && (
                 <p className="text-[11px] text-gray-600 mb-2">
